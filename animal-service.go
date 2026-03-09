@@ -77,22 +77,19 @@ func createNewAnimalHandler(writer http.ResponseWriter, request *http.Request) {
 	animals = append(animals, animal)
 	mutex.Unlock()
 
-	writer.Header().Set("Location", "/animal/"+animal.Id)
+	writer.Header().Set("Location", "/animals/"+animal.Id)
 	writer.WriteHeader(http.StatusCreated)
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(animal)
 }
 
 func updateAnimalHandler(writer http.ResponseWriter, request *http.Request) {
+	id := chi.URLParam(request, "id")
 	var animal Animal
 
 	err := json.NewDecoder(request.Body).Decode(&animal)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if animal.Id == "" {
-		http.Error(writer, "an id has to be provided to edit an animal", http.StatusBadRequest)
 		return
 	}
 	validationError := validate(animal)
@@ -103,22 +100,18 @@ func updateAnimalHandler(writer http.ResponseWriter, request *http.Request) {
 
 	mutex.Lock()
 
-	var foundMatching bool = false
 	for index, element := range animals {
-		if element.Id == animal.Id {
+		if element.Id == id {
 			animals[index] = animal
-			foundMatching = true
-			break
+			mutex.Unlock()
+			writer.WriteHeader(http.StatusOK)
+			writer.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(writer).Encode(animal)
+			return
 		}
 	}
 	mutex.Unlock()
-	if !foundMatching {
-		http.Error(writer, "no animal with id "+animal.Id+" found", http.StatusNotFound)
-		return
-	}
-	writer.WriteHeader(http.StatusOK)
-	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(animal)
+	http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
 }
 
 func deleteAnimalHandler(writer http.ResponseWriter, request *http.Request) {
@@ -126,23 +119,19 @@ func deleteAnimalHandler(writer http.ResponseWriter, request *http.Request) {
 	mutex.Lock()
 
 	var animal Animal
-	var foundMatching bool = false
 	for index, element := range animals {
 		if element.Id == id {
 			animal = animals[index]
 			animals = append(animals[:index], animals[index+1:]...)
-			foundMatching = true
-			break
+			mutex.Unlock()
+			writer.WriteHeader(http.StatusOK)
+			writer.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(writer).Encode(animal)
+			return
 		}
 	}
 	mutex.Unlock()
-	if !foundMatching {
-		http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
-		return
-	}
-	writer.WriteHeader(http.StatusOK)
-	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(animal)
+	http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
 }
 
 func getAnimalDetailHandler(writer http.ResponseWriter, request *http.Request) {
@@ -150,33 +139,29 @@ func getAnimalDetailHandler(writer http.ResponseWriter, request *http.Request) {
 	mutex.Lock()
 
 	var animal Animal
-	var foundMatching bool = false
 	for index, element := range animals {
 		if element.Id == id {
 			animal = animals[index]
-			foundMatching = true
-			break
+			mutex.Unlock()
+			writer.WriteHeader(http.StatusOK)
+			writer.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(writer).Encode(animal)
+			return
 		}
 	}
 	mutex.Unlock()
-	if !foundMatching {
-		http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
-		return
-	}
-	writer.WriteHeader(http.StatusOK)
-	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(animal)
+	http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
 }
 
 func main() {
 	router := chi.NewRouter()
 
-	router.Get("/animal", getAllAnimalsHandler)
-	router.Post("/animal", createNewAnimalHandler)
-	router.Put("/animal", updateAnimalHandler)
+	router.Get("/animals", getAllAnimalsHandler)
+	router.Post("/animals", createNewAnimalHandler)
 
-	router.Delete("/animal/{id}", deleteAnimalHandler)
-	router.Get("/animal/{id}", getAnimalDetailHandler)
+	router.Put("/animals/{id}", updateAnimalHandler)
+	router.Delete("/animals/{id}", deleteAnimalHandler)
+	router.Get("/animals/{id}", getAnimalDetailHandler)
 
 	http.ListenAndServe(":8080", router)
 }
