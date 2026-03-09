@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o animal-service .
+RUN CGO_ENABLED=0 GOOS=linux go build -o animal-service ./cmd/server
 
 FROM scratch
 WORKDIR /root/

@@ -12,7 +12,8 @@ When started you can access the REST-API on [localhost:8080/animals](http://loca
 If you want to run this code you can simply run it on your machine:
 
 ```bash
-$ go run animal-service.go
+$ go run .\cmd\server\main.go 
+Starting Server...
 ```
 
 > [!NOTE]  
