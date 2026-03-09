@@ -32,9 +32,12 @@ jobs:
     needs: test
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Build Docker Image
         run: |
-         docker build --no-cache -t fehuworks/animal-service .
+         docker build -t fehuworks/animal-service .
 
       - name: Log in into Dockerhub
         env:
