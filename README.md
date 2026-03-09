@@ -1,7 +1,7 @@
 # First GO Project
 
-This is a simple go project to experiment with webservices (REST-APIs).
-When started you can access the REST-API on [localhost:8080/animal](http://localhost:8080/animal).
+This is a simple Go project to experiment with building REST APIs.
+When started you can access the REST-API on [localhost:8080/animals](http://localhost:8080/animals).
 
 > [!IMPORTANT]  
 > The application stores all data in memory.
@@ -44,47 +44,60 @@ $ docker run -p 8080:8080 --name animal-service -d fehuworks/animal-service
 
 ### Get all animals
 
-<code>GET</code> on <code>/animal</code> will return an array of all known animals in the system (or an empty array when no animals are known)
+<code>GET</code> on <code>/animals</code> will return an array of all known animals in the system (or an empty array when no animals are known)
 
 ```bash
-$ curl -X GET http://localhost:8080/animal
+$ curl -X GET http://localhost:8080/animals
 [{"id":"c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd","type":"cat","gender":"F","name":"Mira","weight":3.3}, {"id":"b64fa3af-b3c1-4a2f-8982-4768f7d99b57","type":"cat","gender":"M","name":"Pommes","weight":6.66}]
 ```
 
 ### Create an animal
 
-<code>POST</code> on <code>/animal</code> will create (and save) the received entity if no validation errors occur. It is not necessary to provide an <code>id</code> in the entity, it will be ignored.
+<code>POST</code> on <code>/animals</code> will create (and save) the received entity if no validation errors occur. It is not necessary to provide an <code>id</code> in the entity, it will be ignored.
 This action will return the created entity with the generated <code>id</code>.
 
 ```bash
-$ curl -X POST -H "Content-Type: application/json" -d '{"type":"cat","gender":"M","name":"Pommes","weight":6.66}' http://localhost:8080/animal
+$ curl -X POST -H "Content-Type: application/json" -d '{"type":"cat","gender":"M","name":"Pommes","weight":6.66}' http://localhost:8080/animals
 {"id":"b64fa3af-b3c1-4a2f-8982-4768f7d99b57","type":"cat","gender":"M","name":"Pommes","weight":6.66}
 ```
 
 ### Edit an animal
 
-<code>PUT</code> on <code>/animal</code> will override an entity by <code>id</code>. If the sent entity does not contain an <code>id</code> or the provided <code>id</code> is not known an error ([404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)) will be returned. If the <code>id</code> was known the old values of the entity will be replaced with the new provided ones.
+<code>PUT</code> on <code>/animals/{id}</code> will override an entity by <code>id</code>. If the provided <code>id</code> is not known an error ([404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)) will be returned. If the <code>id</code> was known the old values of the entity will be replaced with the new provided ones.
 
 ```bash
-$ curl -X PUT -H "Content-Type: application/json" -d '{"id": "c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd","type": "cat","gender": "F","name": "Mira","weight": 4.20}' http://localhost
-:8080/animal
+$ curl -X PUT -H "Content-Type: application/json" -d '{"type": "cat","gender": "F","name": "Mira","weight": 4.20}' http://localhost:8080/animals/c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd
 {"id":"c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd","type":"cat","gender":"F","name":"Mira","weight":4.2}
 ```
 
 ### Get details of an animal
 
-<code>GET</code> on <code>/animal/{id}</code> will return all details of the corresponding entity if the given <code>id</code> is known. If the given <code>id</code> is not known an error ([404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)) will be returned.
+<code>GET</code> on <code>/animals/{id}</code> will return all details of the corresponding entity if the given <code>id</code> is known. If the given <code>id</code> is not known an error ([404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)) will be returned.
 
 ```bash
-$ curl -X GET http://localhost:8080/animal/c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd
+$ curl -X GET http://localhost:8080/animals/c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd
 {"id":"c7cd5ef2-46f0-4174-b1cd-037bb3f8e2bd","type":"cat","gender":"F","name":"Mira","weight":4.2}
 ```
 
 ### Delete an animal
 
-<code>DELETE</code> on <code>/animal/{id}</code> will delete the corresponding entity if the given <code>id</code> is known and return a copy of the deleted entity. If the given <code>id</code> is not known an error ([404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)) will be returned.
+<code>DELETE</code> on <code>/animals/{id}</code> will delete the corresponding entity if the given <code>id</code> is known and return a copy of the deleted entity. If the given <code>id</code> is not known an error ([404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)) will be returned.
 
 ```bash
-$ curl -X DELETE -H "Content-Type: application/json" http://localhost:8080/animal/47d346e1-54f9-47eb-8c36-98cbd9e48390
+$ curl -X DELETE -H "Content-Type: application/json" http://localhost:8080/animals/47d346e1-54f9-47eb-8c36-98cbd9e48390
 {"id":"47d346e1-54f9-47eb-8c36-98cbd9e48390","type":"dog","gender":"M","name":"Andre","weight":25.1}
+```
+
+## Quick test
+
+Create an animal:
+
+```bash
+$ curl -X POST -H "Content-Type: application/json" -d '{"type":"cat","gender":"M","name":"Pommes","weight":6.66}' http://localhost:8080/animals
+```
+
+List animals:
+
+```bash
+$ curl -X GET http://localhost:8080/animals
 ```
