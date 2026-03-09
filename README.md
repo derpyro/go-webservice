@@ -4,7 +4,8 @@ This is a simple go project to experiment with webservices (REST-APIs).
 When started you can access the REST-API on [localhost:8080/animal](http://localhost:8080/animal).
 
 > [!IMPORTANT]  
-> Critical content demanding immediate user attention due to potential risks.
+> The application stores all data in memory.
+> All entities will be lost when the server restarts.
 
 ## How to run
 
