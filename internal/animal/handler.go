@@ -2,6 +2,8 @@ package animal
 
 import (
 	"encoding/json"
+	"fmt"
+	"go-webservice/animal-service/internal/restclient"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -21,6 +23,18 @@ func (handler *Handler) Routes(router chi.Router) {
 	router.Get("/animals/{id}", handler.get)
 	router.Put("/animals/{id}", handler.update)
 	router.Delete("/animals/{id}", handler.delete)
+	router.Get("/", handler.proxyGetAll)
+}
+
+func (handler *Handler) proxyGetAll(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println("Called proxy")
+	writer.Header().Set("Content-Type", "application/json")
+	data, error := restclient.CallGetAnimals()
+	if error == nil {
+		writer.Write([]byte(data))
+	} else {
+		http.Error(writer, error.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (handler *Handler) getAll(writer http.ResponseWriter, request *http.Request) {
