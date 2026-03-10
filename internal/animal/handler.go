@@ -15,13 +15,12 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (handler *Handler) Routes(r chi.Router) {
-
-	r.Get("/animals", handler.getAll)
-	r.Post("/animals", handler.create)
-	r.Get("/animals/{id}", handler.get)
-	r.Put("/animals/{id}", handler.update)
-	r.Delete("/animals/{id}", handler.delete)
+func (handler *Handler) Routes(router chi.Router) {
+	router.Get("/animals", handler.getAll)
+	router.Post("/animals", handler.create)
+	router.Get("/animals/{id}", handler.get)
+	router.Put("/animals/{id}", handler.update)
+	router.Delete("/animals/{id}", handler.delete)
 }
 
 func (handler *Handler) getAll(writer http.ResponseWriter, request *http.Request) {
@@ -33,7 +32,6 @@ func (handler *Handler) getAll(writer http.ResponseWriter, request *http.Request
 }
 
 func (handler *Handler) create(writer http.ResponseWriter, request *http.Request) {
-
 	var animal Animal
 
 	if err := json.NewDecoder(request.Body).Decode(&animal); err != nil {
@@ -48,13 +46,11 @@ func (handler *Handler) create(writer http.ResponseWriter, request *http.Request
 }
 
 func (handler *Handler) get(writer http.ResponseWriter, request *http.Request) {
-
 	id := chi.URLParam(request, "id")
-
 	animal, ok := handler.service.Get(id)
 
 	if !ok {
-		http.NotFound(writer, request)
+		http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
 		return
 	}
 
@@ -62,9 +58,7 @@ func (handler *Handler) get(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (handler *Handler) update(writer http.ResponseWriter, request *http.Request) {
-
 	id := chi.URLParam(request, "id")
-
 	var animal Animal
 
 	if err := json.NewDecoder(request.Body).Decode(&animal); err != nil {
@@ -75,7 +69,7 @@ func (handler *Handler) update(writer http.ResponseWriter, request *http.Request
 	animal, ok := handler.service.Update(id, animal)
 
 	if !ok {
-		http.NotFound(writer, request)
+		http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
 		return
 	}
 
@@ -83,13 +77,12 @@ func (handler *Handler) update(writer http.ResponseWriter, request *http.Request
 }
 
 func (handler *Handler) delete(writer http.ResponseWriter, request *http.Request) {
-
 	id := chi.URLParam(request, "id")
 
 	animal, ok := handler.service.Delete(id)
 
 	if !ok {
-		http.NotFound(writer, request)
+		http.Error(writer, "no animal with id "+id+" found", http.StatusNotFound)
 		return
 	}
 
